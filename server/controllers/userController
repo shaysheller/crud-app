@@ -1,0 +1,46 @@
+const db = require('../models/projectModels.js');
+
+const userController = {};
+
+userController.signup = async (req, res, next) => {
+  const values = [req.body.username, req.body.password];
+
+  const queryString = 'INSERT INTO users (username, password) VALUES ($1, $2);';
+
+  try {
+    await db.query(queryString, values);
+    return next();
+  } catch (e) {
+    return next({
+      log: 'Express error handler caught signup query error',
+      status: 400,
+      message: { err: 'An error occurred signing up' },
+    });
+  }
+};
+
+userController.login = async (req, res, next) => {
+  const values = [req.body.username, req.body.password];
+
+  const queryString = 'SELECT * FROM users WHERE username = $1 AND password = $2;';
+  try {
+    const data = await db.query(queryString, values);
+    if (data.rowCount) {
+      return next();
+    }
+
+    return next({
+      log: 'Express error handler caught login query error',
+      status: 401,
+      message: { err: 'An error occurred signing up' },
+    });
+  } catch {
+    return next({
+      log: 'Express error handler caught login query error',
+      status: 401,
+      message: { err: 'An error occurred signing up' },
+    });
+  }
+};
+
+module.exports = userController;
